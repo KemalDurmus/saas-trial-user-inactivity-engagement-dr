@@ -1,0 +1,43 @@
+[
+  {
+    "method": "GET",
+    "path": "/",
+    "form_fields": []
+  },
+  {
+    "method": "POST",
+    "path": "/analyze",
+    "form_fields": [
+      {
+        "name": "demo",
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/analyze",
+    "form_fields": [
+      {
+        "name": "signups_text",
+        "value": "email,signup_date,mrr\nsam@example.com,2026-11-01,79\nlee@example.com,2026-11-03,29"
+      },
+      {
+        "name": "activity_text",
+        "value": "email,timestamp\nlee@example.com,2026-11-06T10:00:00Z"
+      },
+      {
+        "name": "window_days",
+        "value": "3"
+      },
+      {
+        "name": "trial_days",
+        "value": "3650"
+      },
+      {
+        "name": "default_mrr",
+        "value": "49"
+      }
+    ]
+  }
+]

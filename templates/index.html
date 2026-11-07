@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}{{ app_title }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='detector.css') }}">{% endblock %}
+{% block content %}
+<div class="container">
+  <section class="card">
+    <h1>Find trial users who went quiet</h1>
+    <p class="muted">Upload your signups and activity exports. We list trial users who are still in their trial but have no activity inside your chosen window, ranked by potential lost MRR. Your files are processed in memory and are not stored.</p>
+
+    <form method="post" action="{{ url_for('feature.analyze') }}" enctype="multipart/form-data">
+      <div class="grid">
+        <div>
+          <h3>1. Signups CSV</h3>
+          <p class="muted small">Columns: <code>email</code>, <code>signup_date</code>, optional <code>mrr</code> (or price).</p>
+          <input type="file" name="signups_file" accept=".csv,.txt,text/csv">
+          <textarea name="signups_text" rows="6" placeholder="…or paste CSV here&#10;email,signup_date,mrr&#10;jane@example.com,2026-11-01,49">{{ form.signups_text }}</textarea>
+        </div>
+        <div>
+          <h3>2. Activity CSV</h3>
+          <p class="muted small">Columns: <code>email</code>, <code>timestamp</code> (one row per event or login).</p>
+          <input type="file" name="activity_file" accept=".csv,.txt,text/csv">
+          <textarea name="activity_text" rows="6" placeholder="…or paste CSV here&#10;email,timestamp&#10;jane@example.com,2026-11-03T10:00:00Z">{{ form.activity_text }}</textarea>
+        </div>
+      </div>
+
+      <div class="grid opts">
+        <label>Inactivity window (days)<input type="number" name="window_days" min="1" max="90" value="{{ form.window_days }}"></label>
+        <label>Trial length (days)<input type="number" name="trial_days" min="1" max="365" value="{{ form.trial_days }}"></label>
+        <label>Default MRR per user ($)<input type="number" name="default_mrr" min="0" step="0.01" value="{{ form.default_mrr }}"></label>
+      </div>
+      <p class="muted small">The default MRR is used for users without an <code>mrr</code> value in your signups file.</p>
+
+      <div class="actions">
+        <button class="btn" type="submit">Find inactive trials</button>
+        <button class="btn btn-secondary" type="submit" name="demo" value="1">Try with sample data</button>
+      </div>
+    </form>
+  </section>
+
+  {% if result %}
+  <section class="card">
+    <h2>Results{% if demo %} <span class="badge">sample data</span>{% endif %}</h2>
+    <div class="grid">
+      <div class="stat"><strong>{{ result.inactive_count }}</strong><span>inactive {{ 'trial' if result.inactive_count == 1 else 'trials' }}</span></div>
+      <div class="stat"><strong>{{ result.total_mrr }}</strong><span>potential lost MRR</span></div>
+      <div class="stat"><strong>{{ result.never_count }}</strong><span>never active</span></div>
+      <div class="stat"><strong>{{ result.active_count }}</strong><span>still active</span></div>
+    </div>
+    <p class="muted">{{ plural(result.trials_checked, 'trial') }} checked as of {{ result.today }}.
+      {% if result.expired_count %}{{ plural(result.expired_count, 'signup') }} with an already-ended trial {{ 'was' if result.expired_count == 1 else 'were' }} left out.{% endif %}
+      {% if not result.used_mrr_column %}No MRR column was found, so the default MRR was applied to everyone.{% endif %}</p>
+
+    {% if result.rows %}
+    <p><a class="btn" download="inactive-trials.csv" href="{{ result.data_uri }}">Download re-engagement list (CSV)</a></p>
+    <table class="resp">
+      <thead><tr><th>#</th><th>Email</th><th>Trial ends</th><th>Days left</th><th>Last activity</th><th>Inactive for</th><th>Potential MRR</th></tr></thead>
+      <tbody>
+      {% for r in result.rows %}
+        <tr>
+          <td data-label="Rank">{{ r.rank }}</td>
+          <td data-label="Email" class="wrap">{{ r.email }}</td>
+          <td data-label="Trial ends">{{ r.trial_end }}</td>
+          <td data-label="Days left">{% if r.days_left <= 2 %}<span class="badge">{{ r.days_left }}</span>{% else %}{{ r.days_left }}{% endif %}</td>
+          <td data-label="Last activity">{{ r.last_activity }}</td>
+          <td data-label="Inactive for">{{ r.days_inactive }}{% if r.days_inactive.isdigit() %} {{ 'day' if r.days_inactive == '1' else 'days' }}{% endif %}</td>
+          <td data-label="Potential MRR">{{ r.mrr_text }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-success">Every trial user in your file has some activity inside the window. Nothing to flag.</div>
+    {% endif %}
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+.container{max-width:1000px;overflow-wrap:anywhere}
+.small{font-size:.85rem}
+textarea,input[type=file]{width:100%;box-sizing:border-box;margin-top:.4rem}
+textarea{font-family:ui-monospace,Consolas,monospace;font-size:.85rem}
+.opts label{display:block}
+.opts input{width:100%;box-sizing:border-box}
+.actions{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem}
+table.resp{width:100%;border-collapse:collapse}
+table.resp td.wrap{overflow-wrap:anywhere}
+code{overflow-wrap:anywhere}
+@media (max-width:640px){
+  table.resp thead{display:none}
+  table.resp,table.resp tbody,table.resp tr,table.resp td{display:block;width:100%;box-sizing:border-box}
+  table.resp tr{border:1px solid rgba(128,128,128,.35);border-radius:10px;margin-bottom:.75rem;padding:.4rem .6rem}
+  table.resp td{display:flex;justify-content:space-between;gap:1rem;border:0;padding:.3rem 0;text-align:right;overflow-wrap:anywhere}
+  table.resp td::before{content:attr(data-label);font-weight:600;text-align:left;flex:0 0 40%}
+  .actions .btn{width:100%;text-align:center}
+}
